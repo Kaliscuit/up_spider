@@ -6,6 +6,8 @@
 from scrapy.item import Item, Field
 
 class ZhaopinItem(Item):
-    name = Field()
+    position = Field()
+    company = Field()
+    time = Field()
+    description = Field()
     url = Field()
-    data = Field()
