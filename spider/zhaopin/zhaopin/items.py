@@ -9,5 +9,7 @@ class ZhaopinItem(Item):
     position = Field()
     company = Field()
     time = Field()
-    description = Field()
+    position_desc = Field()
     url = Field()
+    company_desc = Field()
+    company_address = Field()

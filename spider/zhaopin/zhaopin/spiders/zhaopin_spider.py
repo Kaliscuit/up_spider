@@ -2,6 +2,7 @@ from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.selector import HtmlXPathSelector
 from zhaopin.items import ZhaopinItem
+import re
 
 class ZhaopinSpider(CrawlSpider):
     name = 'zhaopin'
@@ -19,8 +20,12 @@ class ZhaopinSpider(CrawlSpider):
         item['position'] = ''.join(''.join(hxs.select('/html/body/div[3]/div[1]/div[1]/div[1]/table[1]/tr[1]/td/h1').select('text()').extract()).split())
         item['company'] = ''.join(''.join(hxs.select('/html/body/div[3]/div[1]/div[1]/div[1]/table[1]/tr[2]/td/h2/a').select('text()').extract()).split())
         item['time'] = ''.join(''.join(hxs.select('//*[@id="span4freshdate"]').select('text()').extract()).split())
-        item['description'] = ''.join(''.join(hxs.select('/html/body/div[3]/div[1]/div[2]/div[2]').select('text()').extract()).split())
+        item['position_desc'] = ''.join(''.join(hxs.select('/html/body/div[3]/div[1]/div[2]/div[2]').extract()).split())
+        item['company_address'] = ''.join(''.join(hxs.select('/html/body/div[3]/div[1]/div[3]/div[2]/div[2]/text()[2]').extract()).split())
+        item['company_desc'] = ''.join(''.join(hxs.select('/html/body/div[3]/div[1]/div[3]/div[2]/p[1]').extract()).split())
         item['url'] = response.url
+        for i in item:
+            item[i] = re.sub(r'</?\w+[^>]*>','',item[i])
         return item
 
 
