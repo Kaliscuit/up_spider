@@ -11,5 +11,6 @@ class ZhaopinItem(Item):
     time = Field()
     position_desc = Field()
     url = Field()
+    company_homepage = Field()
     company_desc = Field()
     company_address = Field()
