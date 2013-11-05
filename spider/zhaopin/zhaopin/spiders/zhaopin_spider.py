@@ -64,7 +64,9 @@ def repalce(s,re_exp,repl_string):
 class ZhaopinSpider(CrawlSpider):
     name = 'zhaopin'
     #start_urls = ['http://jobs.zhaopin.com']
-    start_urls = ['http://sou.zhaopin.com/jobs/searchresult.ashx?bj=160000&sj=045']
+    start_urls = [
+        'http://sou.zhaopin.com/jobs/SearchResult.ashx?bj=160000&jl=0&sm=0&p=1&sf=0'
+        ]
     allowed_domains = ['zhaopin.com']
     rules = (
             Rule(SgmlLinkExtractor(allow=r'jobs.zhaopin.com/(.\d+)\.htm', tags='a'), callback='parse_item', follow = True),
