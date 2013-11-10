@@ -75,7 +75,7 @@ class BaiduSpider(CrawlSpider):
         item = ZhaopinItem()
         item['position'] = ''.join(''.join(hxs.select('//*[@id="hrs_searchOuter"]/h4').select('text()').extract()).split())
         item['company'] = '百度在线网络技术'.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[1]/dd[1]').select('text()').extract()).split())
-        item['time'] = ''.join(''.join(hxs.select('//*[@id="span4freshdate"]').select('text()').extract()).split())
+        item['time'] = '2013-11-05'
         item['position_desc'] = ''.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[2]/div').extract()).split())
         item['company_homepage'] = 'http://www.baidu.com'
         item['company_address'] = ''.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[1]/dd[2]/font').extract()).split())
