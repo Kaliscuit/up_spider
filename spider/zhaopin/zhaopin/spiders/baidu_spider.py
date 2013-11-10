@@ -93,6 +93,7 @@ class BaiduSpider(CrawlSpider):
         regions = hxs.select('//*[@id="hrs_joblistTable"]/tbody/tr[position()>0]/td[3]/span/@title').extract() 
         
         for i in range(0, len(names)):
+            print i, names[i].encode("utf-8")
             item = ZhaopinItem()
             try:
                 item['position'] = names[i].split('_')[1].encode("utf-8")
