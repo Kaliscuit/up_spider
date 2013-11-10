@@ -66,8 +66,8 @@ class BaiduSpider(CrawlSpider):
     start_urls = ['http://talent.baidu.com/baidu/web/templet1000/index/corpwebPosition1000baidu!getPostListByConditionBaidu?positionType=0&brandCode=1&releaseTime=0&trademark=0&useForm=0&recruitType=2&lanType=&keyWord=&workPlaceCode=&request_locale=zh_CN']
     allowed_domains = ['baidu.com']
     rules = (
-            Rule(SgmlLinkExtractor(allow=r'*getOnePosition*', tags='a'), callback='parse_item', follow = True),
-            Rule(SgmlLinkExtractor(allow=(r'*getPostListByConditionBaidu*', )), follow=True, process_request='add_cookie'),
+            Rule(SgmlLinkExtractor(allow=r'.*getOnePosition.*', tags='a'), callback='parse_item', follow = True),
+            Rule(SgmlLinkExtractor(allow=(r'.*getPostListByConditionBaidu.*', )), follow=True, process_request='add_cookie'),
             )
 
     def parse_item(self, response):
