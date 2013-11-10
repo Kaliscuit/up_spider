@@ -4,6 +4,7 @@ from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.selector import HtmlXPathSelector
 from zhaopin.items import ZhaopinItem
 import re
+import sys
 
 
 import re
@@ -71,7 +72,11 @@ class BaiduSpider(CrawlSpider):
             )
 
     def parse_item(self, response):
+        
         hxs = HtmlXPathSelector(response)
+        print type(response)
+        print response
+        sys.exit()
         item = ZhaopinItem()
         item['position'] = ''.join(''.join(hxs.select('//*[@id="hrs_searchOuter"]/h4').select('text()').extract()).split())
         item['company'] = '百度在线网络技术'.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[1]/dd[1]').select('text()').extract()).split())
