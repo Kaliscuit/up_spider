@@ -2,8 +2,10 @@
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.selector import HtmlXPathSelector
+from scrapy.http import TextResponse
 from zhaopin.items import ZhaopinItem
 import re
+import urllib2
 import sys
 
 
@@ -64,39 +66,55 @@ def repalce(s,re_exp,repl_string):
 
 class BaiduSpider(CrawlSpider):
     name = 'baidu'
-    start_urls = ['http://talent.baidu.com/baidu/web/templet1000/index/corpwebPosition1000baidu!getPostListByConditionBaidu?positionType=0&brandCode=1&releaseTime=0&trademark=0&useForm=0&recruitType=2&lanType=&keyWord=&workPlaceCode=&request_locale=zh_CN']
+    start_urls = ['http://talent.baidu.com/baidu/web/templet1000/index/corpwebPosition1000baidu!getPostListByConditionBaidu?pc.currentPage=1&pc.rowSize=1680&releaseTime=&keyWord=&positionType=&trademark=1&workPlaceCode=&positionName=&recruitType=2&brandCode=1&searchType=1&workPlaceNameV=&positionTypeV=&keyWordV=']
     allowed_domains = ['baidu.com']
-    rules = (
-            Rule(SgmlLinkExtractor(allow=r'.*getOnePosition.*', tags='a'), callback='parse_item', follow = True),
-            Rule(SgmlLinkExtractor(allow=(r'.*getPostListByConditionBaidu.*', )), follow=True, process_request='add_cookie'),
-            )
+    # rules = (
+            # Rule(SgmlLinkExtractor(allow=r'.*getOnePosition.*', tags='a'), callback='parse_item', follow = True),
+            # Rule(SgmlLinkExtractor(allow=(r'.*getPostListByConditionBaidu.*', )), follow=True, process_request='process'),
+            # )
 
-    def parse_item(self, response):
-        
-        hxs = HtmlXPathSelector(response)
-        print type(response)
-        print response
-        sys.exit()
-        item = ZhaopinItem()
-        item['position'] = ''.join(''.join(hxs.select('//*[@id="hrs_searchOuter"]/h4').select('text()').extract()).split())
-        item['company'] = '百度在线网络技术'.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[1]/dd[1]').select('text()').extract()).split())
-        item['time'] = '2013-11-05'
+    def process(self, url):
+        response = urllib2.urlopen(url)
+        html = response.read()
+        hxs = HtmlXPathSelector(text=html)
+        item = {}
         item['position_desc'] = ''.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[2]/div').extract()).split())
-        item['company_homepage'] = 'http://www.baidu.com'
-        item['company_address'] = ''.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[1]/dd[2]/font').extract()).split())
         item['company_desc'] = ''.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[3]/div').extract()).split())
-        item['url'] = response.url
-        for i in item:
-            item[i] = filter_tags(item[i])
-            # item[i] = re.sub(r'</?\w+[^>]*>','',item[i]).encode('utf-8')
-        # if(item['company_homepage'].startswith('公司主页：')):
-            # item['company_homepage'] = item['company_homepage'].replace('公司主页：', '')
-
         return item
 
 
-    def add_cookie(self, request):
-        request.replace(cookies=[
-            {'name': 'COOKIE_NAME','value': 'VALUE','domain': '.douban.com','path': '/'},
-            ]);
-        return request;
+    def parse(self, response):
+        
+        hxs = HtmlXPathSelector(response)
+        items = []
+        names = hxs.select('//*[@id="hrs_joblistTable"]/tbody/tr[position()>0]/td[1]/a/text()').extract()
+        urls = hxs.select('//*[@id="hrs_joblistTable"]/tbody/tr[position()>0]/td[1]/a/@href').extract() 
+        times = hxs.select('//*[@id="hrs_joblistTable"]/tbody/tr[position()>0]/td[4]/text()').extract() 
+        regions = hxs.select('//*[@id="hrs_joblistTable"]/tbody/tr[position()>0]/td[3]/span/@title').extract() 
+        
+        for i in range(0, len(names)):
+            item = ZhaopinItem()
+            try:
+                item['position'] = names[i].split('_')[1].encode("utf-8")
+                item['company'] = '百度在线网络技术' + names[i].split('_')[0].encode("utf-8")
+            except:
+                try:
+                    item['position'] = names[i].split('-')[1].encode("utf-8")
+                    item['company'] = '百度在线网络技术' + names[i].split('-')[0].encode("utf-8")
+                except:
+                    item['position'] = names[i].encode("utf-8")
+                    item['company'] = '百度在线网络技术'
+            item['time'] = times[i].encode("utf-8")
+            item['url'] = 'http://talent.baidu.com' + urls[i].encode("utf-8")
+            item['company_address'] = regions[i].encode("utf-8")
+            item['company_homepage'] = 'http://www.baidu.com'
+            item_request = self.process(item['url'])
+            item['position_desc'] = item_request['position_desc']
+            item['company_desc'] = item_request['company_desc']
+            for i in item:
+                item[i] = filter_tags(item[i])
+            items.append(item)
+        return items
+
+
+    
