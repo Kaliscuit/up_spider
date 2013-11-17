@@ -64,11 +64,11 @@ def repalce(s,re_exp,repl_string):
     return re_exp.sub(repl_string,s)
 
 
-class BaiduSpider(CrawlSpider):
-    name = 'baidu'
+class SohuSpider(CrawlSpider):
+    name = 'sohu'
     # start_urls = ['http://talent.baidu.com/baidu/web/templet1000/index/corpwebPosition1000baidu!getPostListByConditionBaidu?pc.currentPage=1&pc.rowSize=1680&releaseTime=&keyWord=&positionType=&trademark=1&workPlaceCode=&positionName=&recruitType=2&brandCode=1&searchType=1&workPlaceNameV=&positionTypeV=&keyWordV=']
-    start_urls = ['http://talent.baidu.com/baidu/web/templet1000/index/corpwebPosition1000baidu!getPostListByConditionBaidu?positionType=0/1227/10002&brandCode=1&releaseTime=0&trademark=0&useForm=0&recruitType=2&lanType=&workPlaceCode=&keyWord=&request_locale=zh_CN&pc.currentPage=1&pc.rowSize=2000']
-    allowed_domains = ['baidu.com']
+    start_urls = ['http://www.wintalent.cn:8010/wt/sohu/web/templet1000/index/corpwebPosition1000sohu!getPostListByCondition?recruitType=2&keyWord=&positionType=0%2F1227%2F74510116&workPlace=&releaseTime=0&trademark=0&brandCode=1&comPart=&showComp=true&pc.rowSize=200&pc.currentPage=1']
+    allowed_domains = ['wintalent.cn:8010']
     # rules = (
             # Rule(SgmlLinkExtractor(allow=r'.*getOnePosition.*', tags='a'), callback='parse_item', follow = True),
             # Rule(SgmlLinkExtractor(allow=(r'.*getPostListByConditionBaidu.*', )), follow=True, process_request='process'),
@@ -79,8 +79,8 @@ class BaiduSpider(CrawlSpider):
         html = response.read()
         hxs = HtmlXPathSelector(text=html)
         item = {}
-        item['position_desc'] = ''.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[2]/div').extract()).split())
-        item['requirements'] = ''.join(''.join(hxs.select('//*[@id="hrs_jobDetail"]/dl[3]/div').extract()).split())
+        item['position_desc'] = ''.join(''.join(hxs.select('//*[@id="jobList"]/div[2]/div/table/tbody/tr[2]/td/div/div[1]/p[5]').extract()).split())
+        item['requirements'] = ''.join(''.join(hxs.select('//*[@id="jobList"]/div[2]/div/table/tbody/tr[2]/td/div/div[1]/p[7]').extract()).split())
         return item
 
 
@@ -88,36 +88,29 @@ class BaiduSpider(CrawlSpider):
         
         hxs = HtmlXPathSelector(response)
         items = []
-        names = hxs.select('//*[@id="hrs_joblistTable"]/tbody/tr[position()>0]/td[1]/a/text()').extract()
-        urls = hxs.select('//*[@id="hrs_joblistTable"]/tbody/tr[position()>0]/td[1]/a/@href').extract() 
-        times = hxs.select('//*[@id="hrs_joblistTable"]/tbody/tr[position()>0]/td[4]/text()').extract() 
-        regions = hxs.select('//*[@id="hrs_joblistTable"]/tbody/tr[position()>0]/td[3]/span/@title').extract() 
+        names = hxs.select('//*[@id="postTb"]/tbody/tr[position()>0]/td[1]/a/@title').extract()
+        urls = hxs.select('//*[@id="postTb"]/tbody/tr[position()>0]/td[1]/a/@href').extract() 
+        times = hxs.select('//*[@id="postTb"]/tbody/tr[position()>0]/td[4]/text()').extract() 
+        regions = hxs.select('//*[@id="postTb"]/tbody/tr[position()>0]/td[3]/span/@title').extract() 
         
         for i in range(0, len(names)):
-            print i, names[i].encode("utf-8")
+            print i, names[i].encode("utf-8"), times[i].encode("utf-8")
             item = ZhaopinItem()
             try:
-                item['position'] = names[i].split('_')[1].encode("utf-8")
-                item['company'] = '百度在线网络技术' + names[i].split('_')[0].encode("utf-8")
+                item['position'] = names[i].split('-')[-1].encode("utf-8")
+                item['company'] = '搜狐' + ''.join(names[i].split('-')[:-1]).encode("utf-8")
             except:
-                try:
-                    item['position'] = names[i].split('-')[1].encode("utf-8")
-                    item['company'] = '百度在线网络技术' + names[i].split('-')[0].encode("utf-8")
-                except:
-                    item['position'] = names[i].encode("utf-8")
-                    item['company'] = '百度在线网络技术'
+                item['position'] = names[i].encode("utf-8")
+                item['company'] = '搜狐'                    
             item['time'] = times[i].encode("utf-8")
-            item['url'] = 'http://talent.baidu.com' + urls[i].encode("utf-8")
+            item['url'] = 'http://www.wintalent.cn:8010' + urls[i].encode("utf-8")
             item['company_address'] = regions[i].encode("utf-8")
-            item['company_homepage'] = 'http://www.baidu.com'
+            item['company_homepage'] = 'http://www.sohu.com'
             item_request = self.process(item['url'])
             item['position_desc'] = item_request['position_desc']
             item['requirements'] = item_request['requirements']
-            item['company_desc'] = '百度，全球最大的中文搜索引擎、最大的中文网站。'
+            item['company_desc'] = '搜狐，2008北京奥运会互联网内容服务赞助商。中国互联网文化运动的先驱、中国综合门户网站的创始者。中国互联网主流人群获取资讯和交流的最大网络平台。第一家拥有两个美国上市公司（NASDAQ:SOHU、NASDAQ：CYOU）的中国互联网企业。'
             for i in item:
                 item[i] = filter_tags(item[i]).strip()
             items.append(item)
         return items
-
-
-    

@@ -10,6 +10,7 @@ class ZhaopinItem(Item):
     company = Field()
     time = Field()
     position_desc = Field()
+    requirements = Field()
     url = Field()
     company_homepage = Field()
     company_desc = Field()

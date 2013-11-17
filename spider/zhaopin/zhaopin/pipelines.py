@@ -34,4 +34,4 @@ class ZhaopinPipeline(object):
 
     def _conditional_insert(self, tx, item):
         if item.get('url'):
-            tx.execute('insert into zhaopin (url, position, position_desc, company, company_desc, company_address, company_homepage, time) values (%s, %s, %s, %s, %s, %s, %s, %s)', (item['url'], item['position'], item['position_desc'], item['company'], item['company_desc'], item['company_address'], item['company_homepage'], item['time']))
+            tx.execute('insert into zhaopin (url, position, position_desc, requirements, company, company_desc, company_address, company_homepage, time) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (item['url'], item['position'], item['position_desc'], item['requirements'], item['company'], item['company_desc'], item['company_address'], item['company_homepage'], item['time']))
